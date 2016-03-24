@@ -77,7 +77,17 @@
 {
     _btnTitleArray = btnTitleArray;
     
-    for (NSInteger i = 0; i < [_btnTitleArray count]; i++)
+    [self createButton:_btnTitleArray];
+}
+
+/**
+ *  创建按钮
+ *
+ *  @param array 按钮标数组
+ */
+- (void)createButton:(NSMutableArray *)array
+{
+    for (NSInteger i = 0; i < [array count]; i++)
     {
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
         [btn setFrame:CGRectMake(MENU_BUTTON_WIDTH * i, 0, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)];
@@ -92,7 +102,7 @@
             _lastSelectButton = btn;
             _lastSelectButton.selected = NO;
             _shadowImageView.frame = CGRectMake(0, 0, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT);
-    
+            
         }
         [_topScrollView addSubview:btn];
     }
@@ -114,23 +124,52 @@
             _btnClickedBlock(sender.tag);
         }
         
-        //之前的按钮取消选中
-        _lastSelectButton.selected = NO;
-        // 当前按钮选中
-        sender.selected = YES;
-        // 当前按钮=最后选中按钮
-        _lastSelectButton = sender;
+        [self exchangeButton:sender];
+        [self animatedWithLine:sender];
+        [self animatedScroll:sender];
         
-        // 线移动动画
-        [UIView animateWithDuration:0.25 animations:^{
-            [_shadowImageView setFrame:CGRectMake(sender.frame.origin.x, 0, sender.frame.size.width, MENU_BUTTON_HEIGHT)];
-        } completion:^(BOOL finished) {}];
-        
-        // 计算滚动X距离
-        float scrollX = _topScrollView.frame.size.width * sender.tag  * (MENU_BUTTON_WIDTH / self.frame.size.width) - MENU_BUTTON_WIDTH;
-        // 滚动
-        [_topScrollView scrollRectToVisible:CGRectMake(scrollX, 0, _topScrollView.frame.size.width, _topScrollView.frame.size.height) animated:YES];
     }
+}
+
+/**
+ *  赋值上一次选中Button
+ *
+ *  @param sender
+ */
+- (void)exchangeButton:(UIButton *)sender
+{
+    //之前的按钮取消选中
+    _lastSelectButton.selected = NO;
+    // 当前按钮选中
+    sender.selected = YES;
+    // 当前按钮=最后选中按钮
+    _lastSelectButton = sender;
+}
+
+/**
+ *  线移动动画
+ *
+ *  @param sender
+ */
+- (void)animatedWithLine:(UIButton *)sender
+{
+    // 线移动动画
+    [UIView animateWithDuration:0.25 animations:^{
+        [_shadowImageView setFrame:CGRectMake(sender.frame.origin.x, 0, sender.frame.size.width, MENU_BUTTON_HEIGHT)];
+    } completion:^(BOOL finished) {}];
+}
+
+/**
+ *  点击按钮滚动动画
+ *
+ *  @param sender
+ */
+- (void)animatedScroll:(UIButton *)sender
+{
+    // 计算滚动X距离
+    CGFloat scrollX = _topScrollView.frame.size.width * sender.tag  * (MENU_BUTTON_WIDTH / self.frame.size.width) - MENU_BUTTON_WIDTH;
+    // 滚动
+    [_topScrollView scrollRectToVisible:CGRectMake(scrollX, 0, _topScrollView.frame.size.width, _topScrollView.frame.size.height) animated:YES];
 }
 
 /**
